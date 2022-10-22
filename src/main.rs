@@ -1,11 +1,11 @@
-use std::f32::consts::{ PI, TAU };
+use std::f32::consts::{PI, TAU};
 use std::io::Result;
 use std::path::Path;
 
-use wave_stream::{read_wav_from_file_path, write_wav_to_file_path};
 use wave_stream::open_wav::OpenWav;
 use wave_stream::wave_header::{SampleFormat, WavHeader};
 use wave_stream::wave_reader::{RandomAccessOpenWavReader, StreamOpenWavReader};
+use wave_stream::{read_wav_from_file_path, write_wav_to_file_path};
 
 fn main() {
     let open_wav = read_wav_from_file_path(Path::new("some.wav")).unwrap();
@@ -59,14 +59,24 @@ fn main() {
     };
 
     let open_wav = write_wav_to_file_path(Path::new("ramp.wav"), header).unwrap();
+
+    // Note that the wave is written as f32 (32-bit float). 8-bit (i8), 16-bit (i16), and 24-bit (i32) integer are
+    // also supprted.
+    // Downconverting (IE, float -> 16-bit) is *not* supported. In general, it's best to perform audio manipulation
+    // using f32. Outputting to an integer format like 16-bit (CD quality) will only sound good if you implement your
+    // own noise shaper or dithering algorithm. A command-line tool like sox will perform excellent noise shaping if
+    // you write a 32-bit float wav, and then use sox to convert it to 16-bit.
     let mut random_access_wave_writer = open_wav.get_random_access_f32_writer().unwrap();
 
     let samples_in_ramp = 2000;
     let samples_in_ramp_f32 = samples_in_ramp as f32;
-    for sample in 0u32..(sample_rate * 3u32) { // Write 3 seconds of samples
+    for sample in 0u32..(sample_rate * 3u32) {
+        // Write 3 seconds of samples
         let modulo = (sample % samples_in_ramp) as f32;
         let sample_value = (2f32 * modulo / samples_in_ramp_f32) - 1f32;
-        random_access_wave_writer.write_sample(sample, 0, sample_value).unwrap();
+        random_access_wave_writer
+            .write_sample(sample, 0, sample_value)
+            .unwrap();
     }
 
     random_access_wave_writer.flush().unwrap();
@@ -82,7 +92,7 @@ fn main() {
     let open_wav = write_wav_to_file_path(Path::new("sine.wav"), header).unwrap();
     let sine_iterator = SineIterator {
         period: (sample_rate / 60) as f32,
-        current_sample: PI // Start at 0 crossing
+        current_sample: PI, // Start at 0 crossing
     };
     let sine_iterator_three_seconds = sine_iterator.take((sample_rate * 3u32) as usize); // Write 3 seconds
     open_wav.write_all_f32(sine_iterator_three_seconds).unwrap();
@@ -91,7 +101,7 @@ fn main() {
 // Used when writing via iterator
 struct SineIterator {
     period: f32,
-    current_sample: f32
+    current_sample: f32,
 }
 
 // Used when writing via iterator
