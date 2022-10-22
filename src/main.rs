@@ -102,9 +102,9 @@ impl Iterator for SineIterator {
         let result = (self.current_sample / self.period * TAU).sin();
         self.current_sample += 1f32;
 
-        /*if self.current_sample > self.period {
+        if self.current_sample > self.period {
             self.current_sample = 0f32;
-        }*/
+        }
 
         return Some(Ok(vec![result]));
     }
