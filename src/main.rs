@@ -51,7 +51,7 @@ fn main() {
 
     // Write via random access
     // ******************************
-    let sample_rate = 96000;
+    let sample_rate= 96000;
     let header = WavHeader {
         sample_format: SampleFormat::Float,
         channels: 1,
@@ -70,7 +70,7 @@ fn main() {
 
     let samples_in_ramp = 2000;
     let samples_in_ramp_f32 = samples_in_ramp as f32;
-    for sample in 0u32..(sample_rate * 3u32) {
+    for sample in 0usize..((sample_rate * 3) as usize) {
         // Write 3 seconds of samples
         let modulo = (sample % samples_in_ramp) as f32;
         let sample_value = (2f32 * modulo / samples_in_ramp_f32) - 1f32;
