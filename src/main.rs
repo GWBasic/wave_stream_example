@@ -58,26 +58,8 @@ fn main() {
     let sample_rate = 96000;
     let header = WavHeader {
         sample_format: SampleFormat::Float,
-        channels: Channels {
-            front_left: true,
-            front_right: false,
-            front_center: false,
-            low_frequency: false,
-            back_left: false,
-            back_right: false,
-            front_left_of_center: false,
-            front_right_of_center: false,
-            back_center: false,
-            side_left: false,
-            side_right: false,
-            top_center: false,
-            top_front_left: false,
-            top_front_center: false,
-            top_front_right: false,
-            top_back_left: false,
-            top_back_center: false,
-            top_back_right: false,
-        },
+        channels: Channels::new()
+            .front_left(),
         sample_rate,
     };
 
@@ -100,27 +82,8 @@ fn main() {
         random_access_wave_writer
             .write_samples(
                 sample,
-                SamplesByChannel {
-                    front_left: Some(sample_value),
-                    front_right: None,
-                    front_center: None,
-                    low_frequency: None,
-                    back_left: None,
-                    back_right: None,
-                    front_left_of_center: None,
-                    front_right_of_center: None,
-                    back_center: None,
-                    side_left: None,
-                    side_right: None,
-                    top_center: None,
-                    top_front_left: None,
-                    top_front_center: None,
-                    top_front_right: None,
-                    top_back_left: None,
-                    top_back_center: None,
-                    top_back_right: None,
-                },
-            )
+                SamplesByChannel::new()
+                    .front_left(sample_value))
             .unwrap();
     }
 
@@ -130,26 +93,8 @@ fn main() {
     // ******************************
     let header = WavHeader {
         sample_format: SampleFormat::Float,
-        channels: Channels {
-            front_left: true,
-            front_right: false,
-            front_center: false,
-            low_frequency: false,
-            back_left: false,
-            back_right: false,
-            front_left_of_center: false,
-            front_right_of_center: false,
-            back_center: false,
-            side_left: false,
-            side_right: false,
-            top_center: false,
-            top_front_left: false,
-            top_front_center: false,
-            top_front_right: false,
-            top_back_left: false,
-            top_back_center: false,
-            top_back_right: false,
-        },
+        channels: Channels::new()
+            .front_left(),
         sample_rate,
     };
 
@@ -180,25 +125,7 @@ impl Iterator for SineIterator {
             self.current_sample = 0f32;
         }
 
-        return Some(Ok(SamplesByChannel {
-            front_left: Some(result),
-            front_right: None,
-            front_center: None,
-            low_frequency: None,
-            back_left: None,
-            back_right: None,
-            front_left_of_center: None,
-            front_right_of_center: None,
-            back_center: None,
-            side_left: None,
-            side_right: None,
-            top_center: None,
-            top_front_left: None,
-            top_front_center: None,
-            top_front_right: None,
-            top_back_left: None,
-            top_back_center: None,
-            top_back_right: None,
-        }));
+        return Some(Ok(SamplesByChannel::new()
+            .front_left(result)));
     }
 }
