@@ -4,7 +4,7 @@ use std::path::Path;
 
 use wave_stream::open_wav::OpenWav;
 use wave_stream::samples_by_channel::SamplesByChannel;
-use wave_stream::wave_header::{SampleFormat, WavHeader, Channels};
+use wave_stream::wave_header::{Channels, SampleFormat, WavHeader};
 use wave_stream::wave_reader::{RandomAccessOpenWavReader, StreamOpenWavReader};
 use wave_stream::{read_wav_from_file_path, write_wav_to_file_path};
 
@@ -76,7 +76,8 @@ fn main() {
             top_front_right: false,
             top_back_left: false,
             top_back_center: false,
-            top_back_right: false },
+            top_back_right: false,
+        },
         sample_rate,
     };
 
@@ -97,25 +98,29 @@ fn main() {
         let modulo = (sample % samples_in_ramp) as f32;
         let sample_value = (2f32 * modulo / samples_in_ramp_f32) - 1f32;
         random_access_wave_writer
-            .write_samples(sample, SamplesByChannel {
-                front_left: Some(sample_value),
-                front_right: None,
-                front_center: None,
-                low_frequency: None,
-                back_left: None,
-                back_right: None,
-                front_left_of_center: None,
-                front_right_of_center: None,
-                back_center: None,
-                side_left: None,
-                side_right: None,
-                top_center: None,
-                top_front_left: None,
-                top_front_center: None,
-                top_front_right: None,
-                top_back_left: None,
-                top_back_center: None,
-                top_back_right: None })
+            .write_samples(
+                sample,
+                SamplesByChannel {
+                    front_left: Some(sample_value),
+                    front_right: None,
+                    front_center: None,
+                    low_frequency: None,
+                    back_left: None,
+                    back_right: None,
+                    front_left_of_center: None,
+                    front_right_of_center: None,
+                    back_center: None,
+                    side_left: None,
+                    side_right: None,
+                    top_center: None,
+                    top_front_left: None,
+                    top_front_center: None,
+                    top_front_right: None,
+                    top_back_left: None,
+                    top_back_center: None,
+                    top_back_right: None,
+                },
+            )
             .unwrap();
     }
 
@@ -143,7 +148,8 @@ fn main() {
             top_front_right: false,
             top_back_left: false,
             top_back_center: false,
-            top_back_right: false },
+            top_back_right: false,
+        },
         sample_rate,
     };
 
@@ -192,6 +198,7 @@ impl Iterator for SineIterator {
             top_front_right: None,
             top_back_left: None,
             top_back_center: None,
-            top_back_right: None }));
+            top_back_right: None,
+        }));
     }
 }
