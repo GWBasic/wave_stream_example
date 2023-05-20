@@ -3,7 +3,8 @@ use std::io::Result;
 use std::path::Path;
 
 use wave_stream::open_wav::OpenWav;
-use wave_stream::wave_header::{SampleFormat, WavHeader};
+use wave_stream::samples_by_channel::SamplesByChannel;
+use wave_stream::wave_header::{Channels, SampleFormat, WavHeader};
 use wave_stream::wave_reader::{RandomAccessOpenWavReader, StreamOpenWavReader};
 use wave_stream::{read_wav_from_file_path, write_wav_to_file_path};
 
@@ -13,7 +14,7 @@ fn main() {
     // Inspect metadata
     // ******************************
     println!("Number of channels: {0}, samples per second: {1}, bits per sample: {2}, length in samples: {3}",
-        open_wav.channels(),
+        open_wav.num_channels(),
         open_wav.bits_per_sample(),
         open_wav.sample_rate(),
         open_wav.len_samples());
@@ -21,8 +22,11 @@ fn main() {
     // Read via random access
     // ******************************
     let mut random_access_wave_reader = open_wav.get_random_access_f32_reader().unwrap();
-    let first_sample = random_access_wave_reader.read_sample(0, 0).unwrap();
-    println!("First sample, channel 0: {0}", first_sample);
+    let first_sample = random_access_wave_reader.read_sample(0).unwrap();
+    println!(
+        "First sample, front_left: {0}",
+        first_sample.front_left.expect("front_left missing")
+    );
 
     // Read via an enumerable: Find the loudest sample in the wave file
     // ******************************
@@ -42,7 +46,7 @@ fn main() {
     for samples_result in iterator {
         let samples = samples_result.unwrap();
 
-        for sample in samples {
+        for sample in samples.to_vec() {
             loudest_sample = f32::max(loudest_sample, sample);
         }
     }
@@ -51,10 +55,11 @@ fn main() {
 
     // Write via random access
     // ******************************
-    let sample_rate= 96000;
+    let sample_rate = 96000;
     let header = WavHeader {
         sample_format: SampleFormat::Float,
-        channels: 1,
+        channels: Channels::new()
+            .front_left(),
         sample_rate,
     };
 
@@ -75,7 +80,10 @@ fn main() {
         let modulo = (sample % samples_in_ramp) as f32;
         let sample_value = (2f32 * modulo / samples_in_ramp_f32) - 1f32;
         random_access_wave_writer
-            .write_sample(sample, 0, sample_value)
+            .write_samples(
+                sample,
+                SamplesByChannel::new()
+                    .front_left(sample_value))
             .unwrap();
     }
 
@@ -85,7 +93,8 @@ fn main() {
     // ******************************
     let header = WavHeader {
         sample_format: SampleFormat::Float,
-        channels: 1,
+        channels: Channels::new()
+            .front_left(),
         sample_rate,
     };
 
@@ -106,9 +115,9 @@ struct SineIterator {
 
 // Used when writing via iterator
 impl Iterator for SineIterator {
-    type Item = Result<Vec<f32>>;
+    type Item = Result<SamplesByChannel<f32>>;
 
-    fn next(&mut self) -> Option<Result<Vec<f32>>> {
+    fn next(&mut self) -> Option<Result<SamplesByChannel<f32>>> {
         let result = (self.current_sample / self.period * TAU).sin();
         self.current_sample += 1f32;
 
@@ -116,6 +125,7 @@ impl Iterator for SineIterator {
             self.current_sample = 0f32;
         }
 
-        return Some(Ok(vec![result]));
+        return Some(Ok(SamplesByChannel::new()
+            .front_left(result)));
     }
 }
